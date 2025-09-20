@@ -9,70 +9,159 @@ export function getDatabase() {
     db = new Database(dbPath);
     
     // Create tables and insert sample data
-    initializeDatabase();
+    initializeGameDatabase();
   }
   return db;
 }
 
-function initializeDatabase() {
-  // Create sample tables
+// function initializeGameDatabase() {
+//   // Create table for exorcism game
+//   db.exec(`
+//     CREATE TABLE IF NOT EXISTS exorcism_items (
+//       id INTEGER PRIMARY KEY,
+//       item_name TEXT NOT NULL,
+//       item_type TEXT NOT NULL,
+//       ritual_day_used TEXT,
+//       used_count INTEGER DEFAULT 0,
+//       offered_in_ritual INTEGER DEFAULT 0, -- use 0/1 instead of BOOLEAN
+//       burn_count INTEGER DEFAULT 0,
+//       location_used TEXT,
+//       ritual_use TEXT
+//     );
+//   `);
+
+//   // Insert sample data
+//   const insertItems = db.prepare(`
+//     INSERT OR IGNORE INTO exorcism_items 
+//     (id, item_name, item_type, ritual_day_used, used_count, offered_in_ritual, burn_count, location_used, ritual_use)
+//     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+//   `);
+
+//   const items = [
+//     // Fruits
+//     [1, 'Coconut', 'fruit', '2025-01-01', 15, 1, 0, null, 'offering'],
+//     [2, 'Banana', 'fruit', '2025-01-01', 10, 1, 0, null, 'offering'],
+//     [3, 'Mango', 'fruit', '2025-01-02', 5, 1, 0, null, 'offering'],
+
+//     // Rosaries
+//     [4, 'Rosary', 'rosary', '2025-01-01', 20, 1, 0, null, 'chanting'],
+//     [5, 'Tulsi Mala', 'rosary', '2025-01-01', 10, 1, 0, null, 'chanting'],
+
+//     // Leaves
+//     [6, 'Neem Leaf', 'leaf', '2025-01-01', 0, 1, 30, null, 'burning'],
+//     [7, 'Peepal Leaf', 'leaf', '2025-01-02', 0, 1, 15, null, 'burning'],
+
+//     // Holy water
+//     [8, 'Holy Water', 'holy_water', '2025-01-01', 0, 1, 0, 'altar', 'purification'],
+
+//     // Distractor item
+//     [9, 'Silver Thread', 'ornament', '2025-01-03', 0, 0, 0, null, null]
+//   ];
+
+//   const insertMany = db.transaction((items) => {
+//     for (const item of items) insertItems.run(...item);
+//   });
+
+//   insertMany(items);
+// }
+
+function initializeGameDatabase() {
+  // Create table for exorcism game
   db.exec(`
-    CREATE TABLE IF NOT EXISTS employees (
+    CREATE TABLE IF NOT EXISTS exorcism_items (
       id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL,
-      department TEXT NOT NULL,
-      salary INTEGER NOT NULL,
-      hire_date DATE NOT NULL
-    );
-    
-    CREATE TABLE IF NOT EXISTS departments (
-      id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL,
-      manager_id INTEGER,
-      budget INTEGER NOT NULL
-    );
-    
-    CREATE TABLE IF NOT EXISTS projects (
-      id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL,
-      department_id INTEGER,
-      start_date DATE,
-      end_date DATE,
-      FOREIGN KEY (department_id) REFERENCES departments(id)
+      item_name TEXT NOT NULL,
+      item_type TEXT NOT NULL,
+      ritual_day_used INTEGER,
+      used_count INTEGER,
+      offered_in_ritual INTEGER DEFAULT 0,   -- 0=false, 1=true
+      burn_count INTEGER DEFAULT 0,
+      location_used TEXT,
+      ritual_use INTEGER DEFAULT 0,          -- 0=false, 1=true
+      blessed INTEGER DEFAULT 0,             -- 0=false, 1=true
+      used_with_mantra INTEGER DEFAULT 0,    -- 0=false, 1=true
+      chant_count INTEGER DEFAULT 0,
+      success_count INTEGER DEFAULT 0,
+      always_held INTEGER DEFAULT 0,         -- 0=false, 1=true
+      condition TEXT,
+      scattered_location TEXT
     );
   `);
-  
-  // Insert sample data
-  const insertEmployees = db.prepare(`
-    INSERT OR IGNORE INTO employees (id, name, department, salary, hire_date) 
-    VALUES (?, ?, ?, ?, ?)
+
+  const insertItems = db.prepare(`
+    INSERT OR IGNORE INTO exorcism_items 
+    (id, item_name, item_type, ritual_day_used, used_count, offered_in_ritual, burn_count, location_used, ritual_use, blessed, used_with_mantra, chant_count, success_count, always_held, condition, scattered_location)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
-  
-  const employees = [
-    [1, 'John Doe', 'Engineering', 75000, '2020-01-15'],
-    [2, 'Jane Smith', 'Marketing', 65000, '2019-03-20'],
-    [3, 'Bob Johnson', 'Engineering', 80000, '2021-06-10'],
-    [4, 'Alice Brown', 'HR', 55000, '2018-11-05'],
-    [5, 'Charlie Wilson', 'Marketing', 70000, '2020-09-12']
+
+  const items = [
+    // --- Set 1 ---
+    [1, 'Coconut', 'fruit', 1, 15, 1, 0, null, 1, 0, 0, 0, 0, 0, null, null],
+    [2, 'Banana', 'fruit', 1, 10, 1, 0, null, 1, 0, 0, 0, 0, 0, null, null],
+    [3, 'Mango', 'fruit', 2, 5, 1, 0, null, 1, 0, 0, 0, 0, 0, null, null],
+    [4, 'Rosary', 'rosary', 1, 20, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [5, 'Tulsi Mala', 'rosary', 1, 10, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [6, 'Neem Leaf', 'leaf', 1, 0, 1, 30, null, 0, 0, 0, 0, 0, 0, null, null],
+    [7, 'Peepal Leaf', 'leaf', 2, 0, 1, 15, null, 0, 0, 0, 0, 0, 0, null, null],
+    [8, 'Holy Water', 'holy_water', 1, 0, 1, 0, 'altar', 0, 0, 0, 0, 0, 0, null, null],
+    [9, 'Silver Thread', 'ornament', 3, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+
+    // --- Set 2 ---
+    [10, 'Lemon', 'fruit', 1, 0, 0, 0, null, 1, 0, 0, 0, 0, 0, null, null],
+    [11, 'Orange', 'fruit', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [12, 'Mustard Oil', 'oil', 1, 0, 0, 0, 'circle', 0, 0, 0, 0, 0, 0, null, null],
+    [13, 'Olive Oil', 'oil', 1, 0, 0, 0, 'altar', 0, 0, 0, 0, 0, 0, null, null],
+    [14, 'Blessed Salt', 'sacramental', 1, 0, 0, 0, null, 0, 1, 1, 0, 0, 0, null, null],
+    [15, 'Normal Salt', 'sacramental', 1, 0, 0, 0, null, 0, 0, 1, 0, 0, 0, null, null],
+    [16, 'Cow Horn', 'animal', 2, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [17, 'Charcoal Dust', 'dust', 2, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+
+    // --- Set 3 ---
+    [18, 'Crow Bone', 'animal_product', 1, 0, 0, 0, 'altar', 0, 0, 0, 0, 0, 0, null, null],
+    [19, 'Rudra Ashtak', 'mantra', 1, 0, 0, 0, null, 0, 0, 0, 3, 2, 0, null, null],
+    [20, 'Traveler’s Crucifix', 'crucifix', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 1, null, null],
+    [21, 'Clay Figurine', 'artifact', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [22, 'Fake Bell', 'ornament', 2, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+
+    // --- Set 4 ---
+    [23, 'Lemon', 'fruit', 1, 0, 0, 0, null, 1, 0, 0, 0, 0, 0, null, null],
+    [24, 'Sandalwood Oil', 'oil', 1, 0, 0, 0, null, 0, 0, 1, 0, 0, 0, null, null],
+    [25, 'Rusty Axe', 'tool', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, 'rusty', null],
+    [26, 'Silver Knife', 'tool', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, 'sharp', null],
+    [27, 'Mango Leaf', 'leaf', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+
+    // --- Set 5 ---
+    [28, 'Goat Horn', 'animal_product', 1, 0, 1, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [29, 'Pocket Crucifix', 'crucifix', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 1, null, null],
+    [30, 'Mustard Oil', 'oil', 1, 0, 0, 0, 'circle', 0, 0, 0, 0, 0, 0, null, null],
+    [31, 'Charcoal Dust', 'dust', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [32, 'Red Cloth', 'cloth', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+
+    // --- Set 6 ---
+    [33, 'Narasimha Kavach', 'mantra', 1, 0, 0, 0, null, 0, 0, 0, 1, 1, 0, null, null],
+    [34, 'Broken Rosary', 'rosary', 1, null, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [35, 'Blessed Salt', 'sacramental', 1, 0, 0, 0, null, 0, 1, 1, 0, 0, 0, null, null],
+    [36, 'Clay Idol', 'artifact', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [37, 'Garlic Paste', 'ingredient', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+
+    // --- Set 7 ---
+    [38, 'Tulsi Leaf', 'leaf', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null], // scattered_location IS NULL
+    [39, 'Full Moon Robe', 'vestment', 15, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [40, 'Pomegranate', 'fruit', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null], // offered_in_ritual = 0
+    [41, 'Wooden Beads', 'wooden', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null],
+    [42, 'Cow Horn', 'animal', 1, 0, 0, 0, null, 0, 0, 0, 0, 0, 0, null, null]
   ];
-  
-  employees.forEach(emp => insertEmployees.run(...emp));
-  
-  // Similar for departments and projects...
-  const insertDepartments = db.prepare(`
-    INSERT OR IGNORE INTO departments (id, name, manager_id, budget) 
-    VALUES (?, ?, ?, ?)
-  `);
-  
-  const departments = [
-    [1, 'Engineering', 1, 500000],
-    [2, 'Marketing', 2, 200000],
-    [3, 'HR', 4, 150000]
-  ];
-  
-  departments.forEach(dept => insertDepartments.run(...dept));
+
+  const insertMany = db.transaction((items) => {
+    for (const item of items) insertItems.run(...item);
+  });
+
+  insertMany(items);
 }
 
+
+
+//FUNCTION TO EXECUTE AND TEST QUERY
 export function executeQuery(query) {
   try {
     const db = getDatabase();

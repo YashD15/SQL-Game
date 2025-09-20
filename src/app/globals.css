@@ -1,26 +1,71 @@
-@import "tailwindcss";
+/* src/app/globals.css */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@tailwind utilities;
+@import "tailwindcss/preflight";
+
+/* Custom scrollbar styles for better UI */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 4px;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Code textarea improvements */
+textarea.font-mono {
+  font-family: 'Fira Code', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+  line-height: 1.5;
+}
+
+/* Game specific styles */
+.game-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
+}
+
+/* Table styles for query results */
+.result-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.result-table th,
+.result-table td {
+  border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+}
+
+.result-table th:first-child,
+.result-table td:first-child {
+  border-left: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+.result-table th:last-child,
+.result-table td:last-child {
+  border-right: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+.result-table th {
+  border-top: 1px solid rgba(75, 85, 99, 0.2);
 }
