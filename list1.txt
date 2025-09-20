@@ -1,0 +1,60 @@
+Corrupted List 1
+
+🎭 Items: Coconut ✅, Rosary ✅, Neem Leaf ✅, Silver Thread, Holy Water
+
+🍋 Riddle 1: Ritual shuru hone se pehle sabse zyada chadhaya gaya phal kaun tha?
+Table: exorcism_items(item_name, item_type, ritual_day_used, used_count, offered_in_ritual)
+(Item_type = 'fruit')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'fruit' AND offered_in_ritual = TRUE
+ORDER BY used_count DESC LIMIT 1;
+
+
+✅ Answer: Coconut
+
+📿 Riddle 2: Sabse frequently use hone wali mala kaunsi thi?
+Table: exorcism_items(item_name, item_type, used_count)
+(Item_type = 'rosary')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'rosary'
+ORDER BY used_count DESC LIMIT 1;
+
+
+✅ Answer: Rosary
+
+🌿 Riddle 3: Kaunsa patta har ritual mein sabse pehle jalta tha?
+Table: exorcism_items(item_name, item_type, burn_count)
+(Item_type = 'leaf')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'leaf'
+ORDER BY burn_count DESC LIMIT 1;
+
+
+✅ Answer: Neem Leaf
+
+✨ Riddle 4: Ritual ke dauran kisi ne chadhaya hua paani kis jagah use kiya?
+Table: exorcism_items(item_name, item_type, location_used, ritual_use)
+(Item_type = 'holy_water')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'holy_water' AND location_used = 'altar';
+
+
+✅ Answer: Holy Water
+
+🪙 Riddle 5: Ek non-ritual item jo distractor tha, par teams confuse ho sakti thi?
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Silver Thread';
+
+
+✅ Answer: Silver Thread

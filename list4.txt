@@ -1,0 +1,57 @@
+Corrupted List 4
+
+🎭 Items: Lemon, Sandalwood Oil ✅, Rusty Axe ✅, Silver Knife, Mango Leaf ✅
+
+🍋 Riddle 1: Ritual ke dauran defeat ke baad diya gaya phal?
+Table: exorcism_items(item_name, item_type, ritual_use)
+(Item_type = 'fruit')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'fruit' AND ritual_use = TRUE
+ORDER BY item_name DESC LIMIT 1;
+
+
+✅ Answer: Lemon
+
+🛢 Riddle 2: Oil jo hamesha mantra ke saath use hota tha?
+Table: exorcism_items(item_name, item_type, used_with_mantra)
+(Item_type = 'oil')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'oil' AND used_with_mantra = TRUE;
+
+
+✅ Answer: Sandalwood Oil
+
+🔧 Riddle 3: Rusty tool jo last ritual me bhi use hua?
+Table: exorcism_items(item_name, item_type, condition)
+(Item_type = 'tool')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'tool' AND condition = 'rusty';
+
+
+✅ Answer: Rusty Axe
+
+⚔ Riddle 4: Distractor tool item jo confuse kare?
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Silver Knife';
+
+
+✅ Answer: Silver Knife
+
+🍃 Riddle 5: Distractor leaf item jo table me tha?
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Mango Leaf';
+
+
+✅ Answer: Mango Leaf

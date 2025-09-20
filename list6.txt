@@ -1,0 +1,56 @@
+Corrupted List 6
+
+🎭 Items: Narasimha Kavach ✅, Broken Rosary ✅, Blessed Salt ✅, Clay Idol, Garlic Paste
+
+📜 Riddle 1: Mantra jo sirf ek baar chant hua aur 100% success hua?
+Table: exorcism_items(item_name, item_type, chant_count, success_count)
+(Item_type = 'mantra')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'mantra' AND chant_count = 1 AND success_count = 1;
+
+
+✅ Answer: Narasimha Kavach
+
+📿 Riddle 2: Rosary jiska count system kharab tha, par use hoti thi?
+Table: exorcism_items(item_name, item_type, used_count)
+(Item_type = 'rosary')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'rosary' AND used_count IS NULL;
+
+
+✅ Answer: Broken Rosary
+
+🧂 Riddle 3: Sacred item jo mantra ke saath use hua?
+Table: exorcism_items(item_name, item_type, blessed, used_with_mantra)
+(Item_type = 'sacramental')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'sacramental' AND blessed = TRUE AND used_with_mantra = TRUE;
+
+
+✅ Answer: Blessed Salt
+
+🏺 Riddle 4: Distractor item jisse confusion ho sakti thi
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Clay Idol';
+
+
+✅ Answer: Clay Idol
+
+🧄 Riddle 5: Distractor item jisse confusion ho sakti thi
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Garlic Paste';
+
+
+✅ Answer: Garlic Paste

@@ -1,0 +1,57 @@
+Corrupted List 2
+
+🎭 Items: Lemon ✅, Mustard Oil ✅, Blessed Salt ✅, Charcoal Dust, Cow Horn
+
+🍋 Riddle 1: Sirf defeat ke baad diya gaya phal kaun tha?
+Table: exorcism_items(item_name, item_type, ritual_use)
+(Item_type = 'fruit')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'fruit' AND ritual_use = TRUE
+ORDER BY item_name DESC LIMIT 1;
+
+
+✅ Answer: Lemon
+
+🛢 Riddle 2: Protective circle ke andar sirf kaunsa tel use hua?
+Table: exorcism_items(item_name, item_type, location_used)
+(Item_type = 'oil')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'oil' AND location_used = 'circle';
+
+
+✅ Answer: Mustard Oil
+
+🧂 Riddle 3: Sacred item jo mantra ke saath use hua?
+Table: exorcism_items(item_name, item_type, blessed, used_with_mantra)
+(Item_type = 'sacramental')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'sacramental' AND blessed = TRUE AND used_with_mantra = TRUE;
+
+
+✅ Answer: Blessed Salt
+
+🔥 Riddle 4: Ek animal product jo distractor tha?
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Cow Horn';
+
+
+✅ Answer: Cow Horn
+
+⚫ Riddle 5: Ek distractor dust item, jisse confusion ho sakti thi
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Charcoal Dust';
+
+
+✅ Answer: Charcoal Dust

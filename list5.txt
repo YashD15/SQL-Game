@@ -1,0 +1,59 @@
+Corrupted List 5
+
+🎭 Items: Goat Horn ✅, Pocket Crucifix ✅, Mustard Oil ✅, Charcoal Dust, Red Cloth
+
+🐐 Riddle 1: Animal product jo chadhaya gaya par kabhi aag me nahi dala?
+Table: exorcism_items(item_name, item_type, offered_in_ritual, burn_count)
+(Item_type = 'animal_product')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'animal_product' AND offered_in_ritual = TRUE AND burn_count = 0;
+
+
+✅ Answer: Goat Horn
+
+✝ Riddle 2: Crucifix jo hamesha haath me rakha gaya aur haath chhuta nahi?
+Table: exorcism_items(item_name, item_type, always_held)
+(Item_type = 'crucifix')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'crucifix' AND always_held = TRUE;
+
+
+✅ Answer: Pocket Crucifix
+
+🛢 Riddle 3: Oil jo hamesha protective circle ke andar use hota tha?
+Table: exorcism_items(item_name, item_type, location_used)
+(Item_type = 'oil')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'oil' AND location_used = 'circle';
+
+
+✅ Answer: Mustard Oil
+
+🪙 Riddle 4: Distractor item jo table me exist karta tha?
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Charcoal Dust';
+
+
+✅ Answer: Charcoal Dust
+
+🔴 Riddle 5: Distractor cloth item jo table me tha?
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Red Cloth';
+
+
+✅ Answer: Red Cloth
+
+
+

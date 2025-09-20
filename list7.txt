@@ -1,0 +1,57 @@
+Corrupted List 7
+
+🎭 Items: Tulsi Leaf ✅, Full Moon Robe ✅, Pomegranate ✅, Wooden Beads, Cow Horn
+
+🍀 Riddle 1: Leaf jo hamesha haath se uthaya jaata tha, zameen par nahi?
+Table: exorcism_items(item_name, item_type, scattered_location)
+(Item_type = 'leaf')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'leaf' AND scattered_location IS NULL;
+
+
+✅ Answer: Tulsi Leaf
+
+🧣 Riddle 2: Priest ka vastra jo sirf poornima ko pehna jaata tha?
+Table: exorcism_items(item_name, item_type, ritual_day_used)
+(Item_type = 'vestment')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'vestment' AND ritual_day_used = 15;
+
+
+✅ Answer: Full Moon Robe
+
+🍇 Riddle 3: Fruit jo kabhi ritual me offer nahi hua?
+Table: exorcism_items(item_name, item_type, offered_in_ritual)
+(Item_type = 'fruit')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'fruit' AND offered_in_ritual = FALSE
+ORDER BY item_name LIMIT 1;
+
+
+✅ Answer: Pomegranate
+
+🪵 Riddle 4: Distractor wooden item
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Wooden Beads';
+
+
+✅ Answer: Wooden Beads
+
+🐄 Riddle 5: Distractor cow-related item
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Cow Horn';
+
+
+✅ Answer: Cow Horn

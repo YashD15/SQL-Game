@@ -1,0 +1,56 @@
+Corrupted List 3
+
+🎭 Items: Crow Bone ✅, Rudra Ashtak ✅, Traveler’s Crucifix ✅, Clay Figurine, Fake Bell
+
+🦴 Riddle 1: Animal product jo altar pe rakha gaya, par naam lene se log darte the?
+Table: exorcism_items(item_name, item_type, location_used)
+(Item_type = 'animal_product')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'animal_product' AND location_used = 'altar';
+
+
+✅ Answer: Crow Bone
+
+📜 Riddle 2: Mantra jo sirf 3 baar chant hua aur 2 baar successful tha?
+Table: exorcism_items(item_name, item_type, chant_count, success_count)
+(Item_type = 'mantra')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'mantra' AND chant_count = 3 AND success_count = 2;
+
+
+✅ Answer: Rudra Ashtak
+
+✝ Riddle 3: Crucifix jo hamesha haath me pakda gaya?
+Table: exorcism_items(item_name, item_type, always_held)
+(Item_type = 'crucifix')
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_type = 'crucifix' AND always_held = TRUE;
+
+
+✅ Answer: Traveler’s Crucifix
+
+🏺 Riddle 4: Distractor item jo teams confuse kar sakti thi?
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Clay Figurine';
+
+
+✅ Answer: Clay Figurine
+
+🔔 Riddle 5: Distractor item jo table me exist karta tha, par correct nahi?
+Table: exorcism_items(item_name, item_type)
+Query:
+
+SELECT item_name FROM exorcism_items
+WHERE item_name = 'Fake Bell';
+
+
+✅ Answer: Fake Bell
