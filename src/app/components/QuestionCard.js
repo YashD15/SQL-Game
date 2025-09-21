@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle, Circle, AlertCircle, Play, XCircle, Lock } from 'lucide-react';
+import { CheckCircle, Circle, AlertCircle, Play, XCircle, Lock, Heart } from 'lucide-react';
 import { getAttemptsMessage } from '../../utils/gameValidation';
 
 const QuestionCard = ({
@@ -21,6 +21,27 @@ const QuestionCard = ({
 }) => {
   const isBlocked = attempts >= question.maxAttempts;
   const isCorrect = validationStatus === 'correct';
+
+  // Render hearts for attempts
+  const renderHearts = (attempts, maxAttempts = 5) => {
+    const usedAttempts = attempts || 0;
+    const remainingAttempts = Math.max(0, maxAttempts - usedAttempts);
+    
+    return (
+      <div className="flex items-center gap-1">
+        {[...Array(maxAttempts)].map((_, index) => (
+          <Heart
+            key={index}
+            className={`w-4 h-4 ${
+              index < remainingAttempts
+                ? 'text-red-500 fill-red-500' // Red filled heart for remaining attempts
+                : 'text-gray-600 fill-gray-600' // Gray/black heart for used attempts
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
 
   const getStatusIcon = () => {
     if (loading) {
@@ -66,23 +87,20 @@ const QuestionCard = ({
       {/* Question Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="text-white font-semibold text-lg mb-2">
-            Q{question.id}: {question.question}
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-white font-semibold text-lg mb-2">
+              Q{question.id}: {question.question}
+            </h3>
+            {/* Hearts Display - aligned to the right */}
+            <div className="flex items-center gap-2">
+              {renderHearts(attempts, question.maxAttempts || 5)}
+            </div>
+          </div>
           <div className="flex items-center gap-4 text-sm">
             <span className="text-gray-400">Tables: {question.tables.join(', ')}</span>
-            <span className={`px-2 py-1 rounded text-xs font-medium ${
-              isBlocked && !isCorrect 
-                ? 'bg-red-600/20 text-red-300 border border-red-500/30' 
-                : attempts > 0 
-                  ? 'bg-yellow-600/20 text-yellow-300 border border-yellow-500/30'
-                  : 'bg-gray-600/20 text-gray-300 border border-gray-500/30'
-            }`}>
-              {getAttemptsMessage(attempts, question.maxAttempts)}
-            </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-4">
           {getStatusIcon()}
           <button
             onClick={onToggleHint}
@@ -101,7 +119,7 @@ const QuestionCard = ({
             <span className="font-medium">Question Locked</span>
           </div>
           <p className="text-red-200 text-sm mt-1">
-            You've exceeded the maximum number of attempts (5) for this question.
+            You've exceeded the maximum number of attempts ({question.maxAttempts || 5}) for this question.
           </p>
           <p className="text-red-200 text-xs mt-2">
             Expected Answer: <strong>{question.expectedOutput[0].item_name}</strong>
@@ -152,7 +170,7 @@ const QuestionCard = ({
                 </tr>
               </thead>
               <tbody>
-                {result.slice(0, 5).map((row, idx) => (
+                {result.slice(0, 45).map((row, idx) => (
                   <tr key={idx} className="border-b border-gray-700/50">
                     {Object.values(row).map((val, colIdx) => (
                       <td key={colIdx} className="p-2">{String(val)}</td>

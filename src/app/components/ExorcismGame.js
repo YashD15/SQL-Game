@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Database, Skull } from 'lucide-react';
+import { Database, Skull, Heart } from 'lucide-react';
 import { questionSets } from '../../data/randQuestions'; // Updated import
 import { validateQueryResult, getValidationMessage, hasExceededMaxAttempts } from '../../utils/gameValidation';
 import { executeSQLQuery } from '../../services/databaseService';
@@ -11,6 +11,7 @@ import QuestionCard from './QuestionCard';
 const ExorcismGame = () => {
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [currentSetInfo, setCurrentSetInfo] = useState(null);
+  const [selectedQuestionId, setSelectedQuestionId] = useState(null); // New state for selected question
   
   // Game state
   const [queries, setQueries] = useState({});
@@ -34,6 +35,8 @@ const ExorcismGame = () => {
     if (selectedSet && selectedSet.questions) {
       setCurrentQuestions(selectedSet.questions);
       setCurrentSetInfo(selectedSet);
+      // Set first question as selected by default
+      setSelectedQuestionId(selectedSet.questions[0]?.id);
     }
   }, []);
 
@@ -44,6 +47,14 @@ const ExorcismGame = () => {
   const blockedQuestions = currentQuestions.filter(q => 
     hasExceededMaxAttempts(attempts[q.id] || 0, q.maxAttempts || 5) && validationStatus[q.id] !== 'correct'
   ).length;
+
+  // Get currently selected question
+  const selectedQuestion = currentQuestions.find(q => q.id === selectedQuestionId);
+
+  // Handle question selection
+  const selectQuestion = (questionId) => {
+    setSelectedQuestionId(questionId);
+  };
 
   // Execute query for a specific question
   const executeQueryHandler = async (questionId, query) => {
@@ -110,6 +121,27 @@ const ExorcismGame = () => {
     setShowHints(prev => ({ ...prev, [questionId]: !prev[questionId] }));
   };
 
+  // Render hearts for attempts
+  const renderHearts = (questionId, maxAttempts = 5) => {
+    const usedAttempts = attempts[questionId] || 0;
+    const remainingAttempts = Math.max(0, maxAttempts - usedAttempts);
+    
+    return (
+      <div className="flex items-center gap-1">
+        {[...Array(maxAttempts)].map((_, index) => (
+          <Heart
+            key={index}
+            className={`w-3 h-3 ${
+              index < remainingAttempts
+                ? 'text-red-500 fill-red-500' // Red filled heart for remaining attempts
+                : 'text-gray-600 fill-gray-600' // Gray/black heart for used attempts
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
+
   // Reset game
   const resetGame = () => {
     // Load a new random set
@@ -120,6 +152,8 @@ const ExorcismGame = () => {
     if (selectedSet && selectedSet.questions) {
       setCurrentQuestions(selectedSet.questions);
       setCurrentSetInfo(selectedSet);
+      // Set first question as selected by default
+      setSelectedQuestionId(selectedSet.questions[0]?.id);
     }
     
     // Reset all game state
@@ -195,6 +229,12 @@ const ExorcismGame = () => {
           <h1 className="text-2xl font-bold text-red-400">
             🔍 Murder Mystery SQL Investigation
           </h1>
+          {/* Show current question number in header */}
+          {selectedQuestion && !isGameFinished && (
+            <span className="text-yellow-400 text-sm font-medium px-3 py-1 bg-yellow-900/20 rounded border border-yellow-700">
+              Case #{selectedQuestion.id}
+            </span>
+          )}
         </div>
         
         {/* Stats Bar */}
@@ -262,12 +302,16 @@ const ExorcismGame = () => {
                 {currentQuestions.map((question) => {
                   const status = validationStatus[question.id];
                   const isBlocked = hasExceededMaxAttempts(attempts[question.id] || 0, question.maxAttempts || 5) && status !== 'correct';
+                  const isSelected = selectedQuestionId === question.id;
                   
                   return (
                     <div 
                       key={question.id}
-                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
-                        status === 'correct' 
+                      onClick={() => selectQuestion(question.id)}
+                      className={`border rounded-lg p-3 cursor-pointer transition-all duration-200 ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-900/30 ring-1 ring-blue-500/50'
+                          : status === 'correct' 
                           ? 'border-green-700 bg-green-900/20 hover:bg-green-900/30'
                           : isBlocked
                           ? 'border-red-700 bg-red-900/20 hover:bg-red-900/30'
@@ -277,24 +321,33 @@ const ExorcismGame = () => {
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-white font-medium text-sm">Case #{question.id}</span>
+                        <span className={`font-medium text-sm ${isSelected ? 'text-blue-300' : 'text-white'}`}>
+                          Case #{question.id}
+                        </span>
                         <div className="flex items-center gap-2">
+                          {isSelected && <span className="text-blue-400 text-xs">👁️ ACTIVE</span>}
                           {status === 'correct' && <span className="text-green-400 text-xs">✅ SOLVED</span>}
                           {isBlocked && <span className="text-red-400 text-xs">💀 COLD</span>}
-                          {status === 'incorrect' && !isBlocked && <span className="text-yellow-400 text-xs">🔍 ACTIVE</span>}
+                          {status === 'incorrect' && !isBlocked && <span className="text-yellow-400 text-xs">🔍 INVESTIGATING</span>}
                           {status === 'error' && !isBlocked && <span className="text-orange-400 text-xs">⚠️ ERROR</span>}
-                          {!status && <span className="text-gray-400 text-xs">📋 NEW</span>}
+                          {!status && !isSelected && <span className="text-gray-400 text-xs">📋 NEW</span>}
                         </div>
                       </div>
                       <p className="text-gray-300 text-xs leading-relaxed">
                         {question.question}
                       </p>
-                      {(attempts[question.id] || 0) > 0 && (
-                        <div className="mt-2 text-xs">
-                          <span className="text-gray-500">Attempts: </span>
-                          <span className="text-red-400">{attempts[question.id]}/{question.maxAttempts || 5}</span>
+                      {/* Hearts display for attempts */}
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-500 text-xs">Lives:</span>
+                          {renderHearts(question.id, question.maxAttempts || 5)}
                         </div>
-                      )}
+                        {(attempts[question.id] || 0) > 0 && (
+                          <span className="text-gray-500 text-xs">
+                            {attempts[question.id]}/{question.maxAttempts || 5}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -373,8 +426,14 @@ const ExorcismGame = () => {
                           </span>
                         </div>
                         <p className="text-gray-400 text-xs mb-1">{question.question}</p>
-                        <div className="text-xs text-gray-500">
-                          Attempts: {question.attempts}/{question.maxAttempts || 5}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500 text-xs">Lives:</span>
+                            {renderHearts(question.id, question.maxAttempts || 5)}
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {question.attempts}/{question.maxAttempts || 5}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -388,24 +447,31 @@ const ExorcismGame = () => {
         {/* Right Panel - Question Details */}
         <div className="flex-1 bg-black overflow-y-auto">
           {!isGameFinished ? (
-            <div className="p-6 space-y-6">
-              {currentQuestions.map((question) => (
+            <div className="p-6">
+              {selectedQuestion ? (
                 <QuestionCard
-                  key={question.id}
-                  question={question}
-                  query={queries[question.id]}
-                  result={results[question.id]}
-                  validationStatus={validationStatus[question.id]}
-                  validationMessage={validationMessages[question.id]}
-                  error={errors[question.id]}
-                  loading={loading[question.id]}
-                  showHint={showHints[question.id]}
-                  attempts={attempts[question.id] || 0}
-                  onQueryChange={(value) => handleQueryChange(question.id, value)}
-                  onExecuteQuery={(query) => executeQueryHandler(question.id, query)}
-                  onToggleHint={() => toggleHint(question.id)}
+                  key={selectedQuestion.id}
+                  question={selectedQuestion}
+                  query={queries[selectedQuestion.id]}
+                  result={results[selectedQuestion.id]}
+                  validationStatus={validationStatus[selectedQuestion.id]}
+                  validationMessage={validationMessages[selectedQuestion.id]}
+                  error={errors[selectedQuestion.id]}
+                  loading={loading[selectedQuestion.id]}
+                  showHint={showHints[selectedQuestion.id]}
+                  attempts={attempts[selectedQuestion.id] || 0}
+                  onQueryChange={(value) => handleQueryChange(selectedQuestion.id, value)}
+                  onExecuteQuery={(query) => executeQueryHandler(selectedQuestion.id, query)}
+                  onToggleHint={() => toggleHint(selectedQuestion.id)}
                 />
-              ))}
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center text-gray-400">
+                    <Database className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">Select a case from the left to start investigating</p>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             // Detailed Performance Analysis
