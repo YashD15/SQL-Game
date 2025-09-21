@@ -119,7 +119,7 @@ const QuestionCard = ({
             <span className="font-medium">Question Locked</span>
           </div>
           <p className="text-red-200 text-sm mt-1">
-            You've exceeded the maximum number of attempts ({question.maxAttempts || 5}) for this question.
+            You&apos;ve exceeded the maximum number of attempts ({question.maxAttempts || 5}) for this question.
           </p>
           <p className="text-red-200 text-xs mt-2">
             Expected Answer: <strong>{question.expectedOutput[0].item_name}</strong>
@@ -235,7 +235,7 @@ const QuestionCard = ({
       {validationStatus === 'incorrect' && !isBlocked && (
         <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
           <p className="text-red-300 text-sm">
-            ❌ The query result doesn't match the expected answer exactly.
+            ❌ The query result doesn&apos;t match the expected answer exactly.
           </p>
           <p className="text-red-200 text-xs mt-1">
             Expected: <strong>{JSON.stringify(question.expectedOutput)}</strong>

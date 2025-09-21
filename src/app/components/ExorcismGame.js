@@ -558,7 +558,7 @@ const ExorcismGame = () => {
                     
                     <div className="mt-4 p-3 bg-red-900/20 rounded-lg border border-red-800">
                       <p className="text-red-300 text-sm">
-                        <strong>💡 Detective's Note:</strong> {
+                        <strong>💡 Detective&apos;s Note:</strong> {
                           stats.successRate >= 80 ? 'Outstanding detective work! Ready for the most complex cases.'
                           : stats.successRate >= 60 ? 'Good investigation skills! Try tackling more complex murder cases.'
                           : stats.successRate >= 40 ? 'Keep practicing! Focus on evidence analysis and witness interrogation.'
