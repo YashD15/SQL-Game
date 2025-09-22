@@ -14,57 +14,6 @@ export function getDatabase() {
   return db;
 }
 
-// function initializeGameDatabase() {
-//   // Create table for exorcism game
-//   db.exec(`
-//     CREATE TABLE IF NOT EXISTS exorcism_items (
-//       id INTEGER PRIMARY KEY,
-//       item_name TEXT NOT NULL,
-//       item_type TEXT NOT NULL,
-//       ritual_day_used TEXT,
-//       used_count INTEGER DEFAULT 0,
-//       offered_in_ritual INTEGER DEFAULT 0, -- use 0/1 instead of BOOLEAN
-//       burn_count INTEGER DEFAULT 0,
-//       location_used TEXT,
-//       ritual_use TEXT
-//     );
-//   `);
-
-//   // Insert sample data
-//   const insertItems = db.prepare(`
-//     INSERT OR IGNORE INTO exorcism_items 
-//     (id, item_name, item_type, ritual_day_used, used_count, offered_in_ritual, burn_count, location_used, ritual_use)
-//     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-//   `);
-
-//   const items = [
-//     // Fruits
-//     [1, 'Coconut', 'fruit', '2025-01-01', 15, 1, 0, null, 'offering'],
-//     [2, 'Banana', 'fruit', '2025-01-01', 10, 1, 0, null, 'offering'],
-//     [3, 'Mango', 'fruit', '2025-01-02', 5, 1, 0, null, 'offering'],
-
-//     // Rosaries
-//     [4, 'Rosary', 'rosary', '2025-01-01', 20, 1, 0, null, 'chanting'],
-//     [5, 'Tulsi Mala', 'rosary', '2025-01-01', 10, 1, 0, null, 'chanting'],
-
-//     // Leaves
-//     [6, 'Neem Leaf', 'leaf', '2025-01-01', 0, 1, 30, null, 'burning'],
-//     [7, 'Peepal Leaf', 'leaf', '2025-01-02', 0, 1, 15, null, 'burning'],
-
-//     // Holy water
-//     [8, 'Holy Water', 'holy_water', '2025-01-01', 0, 1, 0, 'altar', 'purification'],
-
-//     // Distractor item
-//     [9, 'Silver Thread', 'ornament', '2025-01-03', 0, 0, 0, null, null]
-//   ];
-
-//   const insertMany = db.transaction((items) => {
-//     for (const item of items) insertItems.run(...item);
-//   });
-
-//   insertMany(items);
-// }
-
 function initializeGameDatabase() {
   // Create table for exorcism game
   db.exec(`
