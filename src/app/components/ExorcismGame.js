@@ -13,6 +13,11 @@ const ExorcismGame = () => {
   const [currentSetInfo, setCurrentSetInfo] = useState(null);
   const [selectedQuestionId, setSelectedQuestionId] = useState(null); // New state for selected question
   
+  // Team
+  const [teamName, setTeamName] = useState('');
+  const [teamInput, setTeamInput] = useState('');
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  
   // Game state
   const [queries, setQueries] = useState({});
   const [results, setResults] = useState({});
@@ -26,24 +31,101 @@ const ExorcismGame = () => {
   // Game state
   const [isGameFinished, setIsGameFinished] = useState(false);
 
-  // Initialize questions with a random set on load
-  useEffect(() => {
+  // Helpers for persistence
+  const getTeamStorageKey = (name) => `sqlGameState_${name}`;
+  const TEAM_NAME_KEY = 'sqlTeamName';
+
+  const initializeRandomSet = () => {
     const setKeys = Object.keys(questionSets);
     const randomSetKey = setKeys[Math.floor(Math.random() * setKeys.length)];
     const selectedSet = questionSets[randomSetKey];
-    
     if (selectedSet && selectedSet.questions) {
       setCurrentQuestions(selectedSet.questions);
       setCurrentSetInfo(selectedSet);
-      // Set first question as selected by default
       setSelectedQuestionId(selectedSet.questions[0]?.id);
     }
+  };
+
+  const loadPersistedState = (name) => {
+    if (typeof window === 'undefined' || !name) return false;
+    try {
+      const raw = localStorage.getItem(getTeamStorageKey(name));
+      if (!raw) return false;
+      const saved = JSON.parse(raw);
+      // Load set
+      const savedSetId = saved?.currentSetInfo?.id;
+      const selectedSet = savedSetId && questionSets[savedSetId] ? questionSets[savedSetId] : null;
+      if (selectedSet) {
+        setCurrentQuestions(selectedSet.questions);
+        setCurrentSetInfo(selectedSet);
+      }
+      // Load game states
+      setSelectedQuestionId(saved.selectedQuestionId ?? selectedSet?.questions[0]?.id ?? null);
+      setQueries(saved.queries || {});
+      setResults(saved.results || {});
+      setValidationStatus(saved.validationStatus || {});
+      setValidationMessages(saved.validationMessages || {});
+      setErrors(saved.errors || {});
+      setLoading({}); // do not persist loading
+      setAttempts(saved.attempts || {});
+      setShowHints(saved.showHints || {});
+      setIsGameFinished(!!saved.isGameFinished);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const persistState = (name) => {
+    if (typeof window === 'undefined' || !name) return;
+    const payload = {
+      currentSetInfo: currentSetInfo ? { id: currentSetInfo.id } : null,
+      selectedQuestionId,
+      queries,
+      results,
+      validationStatus,
+      validationMessages,
+      errors: {},
+      attempts,
+      showHints,
+      isGameFinished,
+    };
+    try {
+      localStorage.setItem(getTeamStorageKey(name), JSON.stringify(payload));
+    } catch {}
+  };
+
+  // On first mount, get team name or ask for it
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const savedTeam = localStorage.getItem(TEAM_NAME_KEY);
+    if (savedTeam) {
+      setTeamName(savedTeam);
+    } else {
+      setIsTeamModalOpen(true);
+    }
   }, []);
+
+  // When teamName becomes available, load saved game or start new random set
+  useEffect(() => {
+    if (!teamName) return;
+    const loaded = loadPersistedState(teamName);
+    if (!loaded) {
+      initializeRandomSet();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [teamName]);
+
+  // Persist on key state changes
+  useEffect(() => {
+    if (!teamName) return;
+    persistState(teamName);
+  }, [teamName, currentSetInfo, selectedQuestionId, queries, results, validationStatus, validationMessages, attempts, showHints, isGameFinished]);
 
   // Derived state
   const score = Object.values(validationStatus).filter(status => status === 'correct').length;
   const totalQuestions = currentQuestions.length;
-  const isGameCompleted = score === totalQuestions;
+  const isGameCompleted = totalQuestions > 0 && score === totalQuestions;
   const blockedQuestions = currentQuestions.filter(q => 
     hasExceededMaxAttempts(attempts[q.id] || 0, q.maxAttempts || 5) && validationStatus[q.id] !== 'correct'
   ).length;
@@ -145,16 +227,7 @@ const ExorcismGame = () => {
   // Reset game
   const resetGame = () => {
     // Load a new random set
-    const setKeys = Object.keys(questionSets);
-    const randomSetKey = setKeys[Math.floor(Math.random() * setKeys.length)];
-    const selectedSet = questionSets[randomSetKey];
-    
-    if (selectedSet && selectedSet.questions) {
-      setCurrentQuestions(selectedSet.questions);
-      setCurrentSetInfo(selectedSet);
-      // Set first question as selected by default
-      setSelectedQuestionId(selectedSet.questions[0]?.id);
-    }
+    initializeRandomSet();
     
     // Reset all game state
     setQueries({});
@@ -166,6 +239,11 @@ const ExorcismGame = () => {
     setAttempts({});
     setShowHints({});
     setIsGameFinished(false);
+
+    // Clear persisted state for this team (but keep team name)
+    try {
+      if (teamName) localStorage.removeItem(getTeamStorageKey(teamName));
+    } catch {}
   };
 
   // Finish game manually
@@ -207,21 +285,68 @@ const ExorcismGame = () => {
     }));
   };
 
-  // Don't render if no questions are loaded
-  if (!currentQuestions.length) {
-    return (
-      <div className="h-screen bg-black flex items-center justify-center">
-        <div className="bg-gray-900 border border-red-900 rounded-lg p-8 text-center">
-          <Skull className="w-12 h-12 text-red-600 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-red-400 mb-2">Loading Crime Scene...</h1>
-          <div className="text-gray-400">Preparing murder mystery files...</div>
-        </div>
-      </div>
-    );
-  }
+  // Logout / Switch Team
+  const logoutTeam = () => {
+    try {
+      if (teamName) localStorage.removeItem(getTeamStorageKey(teamName));
+      localStorage.removeItem(TEAM_NAME_KEY);
+    } catch {}
+
+    // Clear in-memory state
+    setTeamName('');
+    setTeamInput('');
+    setIsTeamModalOpen(true);
+
+    setCurrentQuestions([]);
+    setCurrentSetInfo(null);
+    setSelectedQuestionId(null);
+    setQueries({});
+    setResults({});
+    setValidationStatus({});
+    setValidationMessages({});
+    setErrors({});
+    setLoading({});
+    setAttempts({});
+    setShowHints({});
+    setIsGameFinished(false);
+  };
 
   return (
     <div className="h-screen bg-black text-white overflow-hidden flex flex-col">
+      {/* Team Name Modal */}
+      {isTeamModalOpen && (
+        <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-gray-900 border border-red-900 rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-bold text-red-400 mb-4">Enter Team Name</h2>
+            <input
+              autoFocus
+              value={teamInput}
+              onChange={(e) => setTeamInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && teamInput.trim()) {
+                  try { localStorage.setItem(TEAM_NAME_KEY, teamInput.trim()); } catch {}
+                  setTeamName(teamInput.trim());
+                  setIsTeamModalOpen(false);
+                }
+              }}
+              placeholder="Type your team name and press Enter"
+              className="w-full px-4 py-2 rounded bg-black/40 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-700"
+            />
+            <button
+              className="mt-4 w-full px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded font-medium disabled:opacity-60"
+              disabled={!teamInput.trim()}
+              onClick={() => {
+                if (!teamInput.trim()) return;
+                try { localStorage.setItem(TEAM_NAME_KEY, teamInput.trim()); } catch {}
+                setTeamName(teamInput.trim());
+                setIsTeamModalOpen(false);
+              }}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="bg-gray-900 border-b border-red-900 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -239,6 +364,12 @@ const ExorcismGame = () => {
         
         {/* Stats Bar */}
         <div className="flex items-center gap-6">
+          {teamName && (
+            <div className="flex items-center gap-1">
+              <span className="text-gray-400 text-sm">Team:</span>
+              <span className="text-white font-bold">{teamName}</span>
+            </div>
+          )}
           <div className="flex items-center gap-1">
             <span className="text-gray-400 text-sm">Solved:</span>
             <span className="text-green-400 font-bold">{score}/{totalQuestions}</span>
@@ -257,6 +388,12 @@ const ExorcismGame = () => {
               <span className="text-red-600 font-bold">{blockedQuestions}</span>
             </div>
           )}
+          <button
+            onClick={logoutTeam}
+            className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-sm font-medium transition-colors"
+          >
+            Logout / Switch Team
+          </button>
         </div>
       </div>
 
@@ -280,7 +417,7 @@ const ExorcismGame = () => {
             </div>
 
             {/* Game Status Messages */}
-            {isGameCompleted && !isGameFinished && (
+            {totalQuestions > 0 && isGameCompleted && !isGameFinished && (
               <div className="bg-green-900/30 border border-green-700 px-4 py-3 rounded mb-4">
                 <span className="text-green-300 font-medium text-sm">
                   ✅ All cases solved! Close investigation to see full report.
@@ -444,11 +581,20 @@ const ExorcismGame = () => {
           </div>
         </div>
 
-        {/* Right Panel - Question Details */}
+        {/* Right Panel - Question Details */
+        }
         <div className="flex-1 bg-black overflow-y-auto">
           {!isGameFinished ? (
             <div className="p-6">
-              {selectedQuestion ? (
+              {!currentQuestions.length ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center text-gray-400">
+                    <Skull className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg">Loading Crime Scene...</p>
+                    <p className="text-sm text-gray-500">Preparing murder mystery files...</p>
+                  </div>
+                </div>
+              ) : selectedQuestion ? (
                 <QuestionCard
                   key={selectedQuestion.id}
                   question={selectedQuestion}
@@ -575,7 +721,7 @@ const ExorcismGame = () => {
       </div>
 
       {/* Auto Complete Detection */}
-      {(isGameCompleted || blockedQuestions === totalQuestions) && !isGameFinished && (
+      {totalQuestions > 0 && (isGameCompleted || blockedQuestions === totalQuestions) && !isGameFinished && (
         <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className={`border rounded-lg p-8 max-w-md w-full mx-4 ${
             isGameCompleted 
