@@ -1,7 +1,6 @@
 /* src/app/globals.css */
 
-@tailwind utilities;
-@import "tailwindcss/preflight";
+@import "tailwindcss";
 
 /* Custom scrollbar styles for better UI */
 ::-webkit-scrollbar {

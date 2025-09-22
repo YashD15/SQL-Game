@@ -1,6 +1,6 @@
 // src/app/layout.js
 
-// import './globals.css'
+import './globals.css'
 
 export const metadata = {
   title: 'SQL Exorcism Mystery Game',
