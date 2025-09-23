@@ -1,12 +1,11 @@
-// src/components/ExorcismGame.jsx
-'use client';
-
+"use client";
 import React, { useState, useEffect } from 'react';
-import { Database, Skull, Heart } from 'lucide-react';
+import { Database, Skull, Heart, Table } from 'lucide-react';
 import { questionSets } from '../../data/randQuestions'; // Updated import
 import { validateQueryResult, getValidationMessage, hasExceededMaxAttempts } from '../../utils/gameValidation';
 import { executeSQLQuery } from '../../services/databaseService';
 import QuestionCard from './QuestionCard';
+import RitualTable from './DummyTable';
 
 const ExorcismGame = () => {
   const [currentQuestions, setCurrentQuestions] = useState([]);
@@ -30,6 +29,9 @@ const ExorcismGame = () => {
 
   // Game state
   const [isGameFinished, setIsGameFinished] = useState(false);
+
+  // Table modal state
+  const [isTableModalOpen, setIsTableModalOpen] = useState(false);
 
   // Helpers for persistence
   const getTeamStorageKey = (name) => `sqlGameState_${name}`;
@@ -311,6 +313,20 @@ const ExorcismGame = () => {
     setIsGameFinished(false);
   };
 
+  // Generate sample table data
+  const generateTableData = () => {
+    const columns = Array.from({length: 16}, (_, i) => `Column_${i + 1}`);
+    const rows = Array.from({length: 43}, (_, rowIndex) => 
+      columns.reduce((row, col, colIndex) => {
+        row[col] = `Row${rowIndex + 1}_Col${colIndex + 1}`;
+        return row;
+      }, {})
+    );
+    return { columns, rows };
+  };
+
+  const { columns: tableColumns, rows: tableRows } = generateTableData();
+
   return (
     <div className="h-screen bg-black text-white overflow-hidden flex flex-col">
       {/* Team Name Modal */}
@@ -347,6 +363,54 @@ const ExorcismGame = () => {
           </div>
         </div>
       )}
+
+      {/* Table Modal */}
+      {isTableModalOpen && (
+        <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-red-900 rounded-lg w-full max-w-6xl max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-red-900">
+              <h2 className="text-xl font-bold text-red-400">Database Table View</h2>
+              <button
+                onClick={() => setIsTableModalOpen(false)}
+                className="text-gray-400 hover:text-white p-1 rounded hover:bg-gray-800 transition-colors"
+              >
+                <span className="text-xl">X</span>
+              </button>
+            </div>
+            
+            {/* Modal Content */}
+            <RitualTable />
+            {/* <div className="flex-1 overflow-auto p-4">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-700 text-sm">
+                  <thead>
+                    <tr>
+                      {tableColumns.map((col, index) => (
+                        <th key={index} className="border border-gray-700 px-2 py-1 bg-gray-800 text-red-400 font-medium">
+                          {col}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tableRows.map((row, rowIndex) => (
+                      <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-gray-950' : 'bg-gray-900'}>
+                        {tableColumns.map((col, colIndex) => (
+                          <td key={colIndex} className="border border-gray-700 px-2 py-1 text-gray-300">
+                            {row[col]}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div> */}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-gray-900 border-b border-red-900 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -388,33 +452,44 @@ const ExorcismGame = () => {
               <span className="text-red-600 font-bold">{blockedQuestions}</span>
             </div>
           )}
-          <button
+          {/* <button
             onClick={logoutTeam}
             className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-sm font-medium transition-colors"
           >
             Logout / Switch Team
-          </button>
+          </button> */}
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Panel - Questions List or Results */}
-        <div className="w-1/3 bg-gray-950 border-r border-red-900 overflow-y-auto">
+        <div className="w-[600px] bg-gray-950 border-r border-red-900 overflow-y-auto">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-red-400 flex items-center gap-2">
                 🗂️ Case Files
               </h2>
-              {!isGameFinished && (
+              <div className="flex gap-2">
                 <button
-                  onClick={finishGame}
-                  className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded text-sm font-medium transition-colors"
+                  onClick={() => setIsTableModalOpen(true)}
+                  className="px-3 py-1 bg-blue-800 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors flex items-center gap-1"
                 >
-                  Close Investigation
+                  <Table className="w-4 h-4" />
+                  View Table
                 </button>
-              )}
+                {!isGameFinished && (
+                  <button
+                    onClick={finishGame}
+                    className="px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded text-sm font-medium transition-colors"
+                  >
+                    Close Investigation
+                  </button>
+                )}
+              </div>
             </div>
+
+            
 
             {/* Game Status Messages */}
             {totalQuestions > 0 && isGameCompleted && !isGameFinished && (
@@ -433,9 +508,41 @@ const ExorcismGame = () => {
               </div>
             )}
 
+            
             {/* Cases List */}
             {!isGameFinished ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
+                {/* Information Paragraphs */}
+            <div className="mb-4 space-y-3">
+              <div className="bg-red-900/20 border border-red-800 rounded-lg p-3">
+                <p className="text-red-200 text-sm leading-relaxed">
+                  🔥🕯️ You have stepped inside the cursed ritual chamber of Tatya Vinchu...<br></br>
+                  The air is thick with incense and dread.<br></br><br></br>
+
+                  At the center lies an ancient ritual circle, bound by six sacred item types:<br></br>
+                  🍎 Fruits, 🍃 Leaves, 🛢️ Oils, 🛠️ Tools, 🐂 Animal Products, and 🔱 Religious Items.<br></br><br></br>
+
+                  ⚔️ Tatya has cast a Query Jaal - a trap woven with SQL logic.<br></br>
+                  ✨ Each correct query lights a virtual candle...<br></br>
+                  💥 Each mistake triggers a burst of spiritual backlash.<br></br><br></br>
+
+                  😈 One of you is already corrupted, carrying a list of 20 ritual items - only a few of them are pure.<br></br>
+                  The other two must solve 5 SQL riddles based on the cursed item table.<br></br><br></br>
+
+                  ⚖️ If at least 3 of your answers match the corrupted list…<br></br>
+                  👉 The ritual will allow you to pass.<br></br>
+                  ❌ If not… you stay trapped in the Query Jaal forever. 🕸️
+                </p>
+              </div>
+              {/* <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-3">
+                <p className="text-blue-200 text-sm leading-relaxed">
+                  Use your investigative skills wisely - you have limited attempts for each case. Analyze the evidence carefully, construct your queries thoughtfully, and remember that attention to detail is key to solving these mysteries. Good luck, detective!
+                </p>
+              </div> */}
+            </div>
+                <div className='pb-2'>
+                  <p className="text-2xl font-bold text-red-400">🗂️ List of Possible Cases</p>
+                </div>
                 {currentQuestions.map((question) => {
                   const status = validationStatus[question.id];
                   const isBlocked = hasExceededMaxAttempts(attempts[question.id] || 0, question.maxAttempts || 5) && status !== 'correct';
@@ -470,11 +577,8 @@ const ExorcismGame = () => {
                           {!status && !isSelected && <span className="text-gray-400 text-xs">📋 NEW</span>}
                         </div>
                       </div>
-                      <p className="text-gray-300 text-xs leading-relaxed">
-                        {question.question}
-                      </p>
                       {/* Hearts display for attempts */}
-                      <div className="mt-2 flex items-center justify-between">
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500 text-xs">Lives:</span>
                           {renderHearts(question.id, question.maxAttempts || 5)}
@@ -495,21 +599,17 @@ const ExorcismGame = () => {
                 <div className={`border rounded-lg p-4 text-center ${
                   isGameCompleted 
                     ? 'border-green-700 bg-green-900/20' 
-                    : stats.successRate >= 60
-                    ? 'border-blue-700 bg-blue-900/20'
                     : 'border-red-700 bg-red-900/20'
                 }`}>
                   <h3 className={`text-xl font-bold mb-2 ${
-                    isGameCompleted ? 'text-green-300' 
-                    : stats.successRate >= 60 ? 'text-blue-300'
-                    : 'text-red-300'
+                    isGameCompleted ? 'text-green-300' : 'text-red-300'
                   }`}>
                     {isGameCompleted ? '🏆 Case Closed!' 
                     : stats.successRate >= 60 ? '🎯 Good Detective Work!'
                     : '💀 Investigation Incomplete'}
                   </h3>
                   
-                  <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="bg-black/30 rounded p-2">
                       <div className="text-lg font-bold text-white">{score}/{totalQuestions}</div>
                       <div className="text-xs text-gray-400">Cases Solved</div>
@@ -520,12 +620,12 @@ const ExorcismGame = () => {
                     </div>
                   </div>
                   
-                  <button
+                  {/* <button
                     onClick={resetGame}
                     className="w-full px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded font-medium transition-colors"
                   >
                     🔄 New Investigation
-                  </button>
+                  </button> */}
                 </div>
                 
                 {/* Detailed Results */}
@@ -562,7 +662,6 @@ const ExorcismGame = () => {
                             : 'NOT ATTEMPTED'}
                           </span>
                         </div>
-                        <p className="text-gray-400 text-xs mb-1">{question.question}</p>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className="text-gray-500 text-xs">Lives:</span>
@@ -581,8 +680,7 @@ const ExorcismGame = () => {
           </div>
         </div>
 
-        {/* Right Panel - Question Details */
-        }
+        {/* Right Panel - Question Details */}
         <div className="flex-1 bg-black overflow-y-auto">
           {!isGameFinished ? (
             <div className="p-6">
