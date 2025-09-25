@@ -7,7 +7,7 @@ import { executeSQLQuery } from '../../services/databaseService';
 import QuestionCard from './QuestionCard';
 import RitualTable from './DummyTable';
 import { info } from "./info";
-// import { logGameResults, downloadGameResults, useGameResults } from './gameResult';
+import { generateFinalResult } from './finalResultGenerator';
 
 const ExorcismGame = () => {
   const [currentQuestions, setCurrentQuestions] = useState([]);
@@ -32,8 +32,17 @@ const ExorcismGame = () => {
   // Finish game manually
   const finishGame = () => {
     setIsGameFinished(true);
+    generateFinalResult({
+    questions: currentQuestions,
+    queries,
+    validationStatus,
+    attempts,
+    showHints,
+    teamName,
+    stats
+  });
   };
-  
+
   // Game state
   const [isGameFinished, setIsGameFinished] = useState(false);
 
@@ -95,7 +104,7 @@ const ExorcismGame = () => {
       validationStatus,
       validationMessages,
       errors: {},
-      attempts,
+      // attempts,
       showHints,
       isGameFinished,
     };
@@ -211,6 +220,38 @@ const ExorcismGame = () => {
   const toggleHint = (questionId) => {
     setShowHints(prev => ({ ...prev, [questionId]: !prev[questionId] }));
   };
+
+  // Function to generate final game result
+// const generateFinalResult = () => {
+//   if (!currentQuestions.length) return;
+
+//   const finalResult = currentQuestions.map((question) => ({
+//     id: question.id,
+//     questionText: question.questionText || question.prompt || '', // keep your field consistent
+//     expectedOutput: question.expectedOutput || null,
+//     userQuery: queries[question.id] || '',
+//     userResult: results[question.id] || null,
+//     status: validationStatus[question.id] || 'not_attempted',
+//     attempts: attempts[question.id] || 0,
+//     isBlocked: hasExceededMaxAttempts(attempts[question.id] || 0, question.maxAttempts || 5) && validationStatus[question.id] !== 'correct',
+//     showHint: showHints[question.id] || false
+//   }));
+
+//   const gameSummary = {
+//     teamName,
+//     totalQuestions: currentQuestions.length,
+//     score,
+//     blockedQuestions,
+//     totalAttempts: stats.totalAttempts,
+//     successRate: stats.successRate,
+//     efficiency: stats.efficiency,
+//     questions: finalResult
+//   };
+
+//   console.log("Final Game Result JSON:", JSON.stringify(gameSummary, null, 2));
+//   return gameSummary;
+// };
+
 
   // Render hearts for attempts
   const renderHearts = (questionId, maxAttempts = 5) => {
