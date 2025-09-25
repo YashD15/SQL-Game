@@ -80,31 +80,39 @@ export default function RitualTable() {
 
   return (
     <div className="overflow-x-auto">
-      <table className="border border-gray-500 border-collapse w-full text-xs">
-        <thead>
-          <tr>
-            {headers.map((head, i) => (
-              <th
-                key={i}
-                className="border border-gray-500 px-2 py-1 bg-gray-600"
+  <table className="border border-gray-500 border-collapse w-full text-xs">
+    <thead>
+      <tr>
+        {headers.map((head, i) =>
+          i !== 1 ? ( // skip 2nd column (index 1)
+            <th
+              key={i}
+              className="border border-gray-500 px-2 py-1 bg-gray-600"
+            >
+              {head}
+            </th>
+          ) : null
+        )}
+      </tr>
+    </thead>
+    <tbody>
+      {items.map((row, rowIndex) => (
+        <tr key={rowIndex}>
+          {row.map((cell, colIndex) =>
+            colIndex !== 1 ? ( // skip 2nd column (index 1)
+              <td
+                key={colIndex}
+                className="border border-gray-500 px-2 py-1"
               >
-                {head}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {row.map((cell, colIndex) => (
-                <td key={colIndex} className="border border-gray-500 px-2 py-1">
-                  {cell !== null ? cell : "NULL"}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                {cell !== null ? cell : "NULL"}
+              </td>
+            ) : null
+          )}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
   );
 }

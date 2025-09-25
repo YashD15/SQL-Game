@@ -6,12 +6,14 @@ import { validateQueryResult, getValidationMessage, hasExceededMaxAttempts } fro
 import { executeSQLQuery } from '../../services/databaseService';
 import QuestionCard from './QuestionCard';
 import RitualTable from './DummyTable';
+import { info } from "./info";
+// import { logGameResults, downloadGameResults, useGameResults } from './gameResult';
 
 const ExorcismGame = () => {
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [currentSetInfo, setCurrentSetInfo] = useState(null);
   const [selectedQuestionId, setSelectedQuestionId] = useState(null); // New state for selected question
-  
+
   // Team
   const [teamName, setTeamName] = useState('');
   const [teamInput, setTeamInput] = useState('');
@@ -27,6 +29,11 @@ const ExorcismGame = () => {
   const [attempts, setAttempts] = useState({});
   const [showHints, setShowHints] = useState({});
 
+  // Finish game manually
+  const finishGame = () => {
+    setIsGameFinished(true);
+  };
+  
   // Game state
   const [isGameFinished, setIsGameFinished] = useState(false);
 
@@ -226,39 +233,13 @@ const ExorcismGame = () => {
     );
   };
 
-  // Reset game
-  const resetGame = () => {
-    // Load a new random set
-    initializeRandomSet();
-    
-    // Reset all game state
-    setQueries({});
-    setResults({});
-    setValidationStatus({});
-    setValidationMessages({});
-    setErrors({});
-    setLoading({});
-    setAttempts({});
-    setShowHints({});
-    setIsGameFinished(false);
-
-    // Clear persisted state for this team (but keep team name)
-    try {
-      if (teamName) localStorage.removeItem(getTeamStorageKey(teamName));
-    } catch {}
-  };
-
-  // Finish game manually
-  const finishGame = () => {
-    setIsGameFinished(true);
-  };
-
+  // Reset game HERE
+  
   // Get game statistics
   const getGameStats = () => {
     const correctAnswers = score;
     const incorrectAttempts = Object.values(attempts).reduce((sum, att) => sum + att, 0) - correctAnswers;
     const totalAttempts = Object.values(attempts).reduce((sum, att) => sum + att, 0);
-    const averageAttemptsPerQuestion = totalAttempts > 0 ? (totalAttempts / totalQuestions).toFixed(1) : 0;
     const successRate = totalQuestions > 0 ? ((correctAnswers / totalQuestions) * 100).toFixed(1) : 0;
     const efficiency = totalAttempts > 0 ? ((correctAnswers / totalAttempts) * 100).toFixed(1) : 0;
     
@@ -267,7 +248,6 @@ const ExorcismGame = () => {
       incorrectAttempts,
       totalAttempts,
       blockedQuestions,
-      averageAttemptsPerQuestion,
       successRate,
       efficiency
     };
@@ -287,32 +267,8 @@ const ExorcismGame = () => {
     }));
   };
 
-  // Logout / Switch Team
-  const logoutTeam = () => {
-    try {
-      if (teamName) localStorage.removeItem(getTeamStorageKey(teamName));
-      localStorage.removeItem(TEAM_NAME_KEY);
-    } catch {}
-
-    // Clear in-memory state
-    setTeamName('');
-    setTeamInput('');
-    setIsTeamModalOpen(true);
-
-    setCurrentQuestions([]);
-    setCurrentSetInfo(null);
-    setSelectedQuestionId(null);
-    setQueries({});
-    setResults({});
-    setValidationStatus({});
-    setValidationMessages({});
-    setErrors({});
-    setLoading({});
-    setAttempts({});
-    setShowHints({});
-    setIsGameFinished(false);
-  };
-
+  // Logout / Switch Team HERE
+  
   // Generate sample table data
   const generateTableData = () => {
     const columns = Array.from({length: 16}, (_, i) => `Column_${i + 1}`);
@@ -371,6 +327,7 @@ const ExorcismGame = () => {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-red-900">
               <h2 className="text-xl font-bold text-red-400">Database Table View</h2>
+              <h3>Answer column is not visible here - item_name</h3>
               <button
                 onClick={() => setIsTableModalOpen(false)}
                 className="text-gray-400 hover:text-white p-1 rounded hover:bg-gray-800 transition-colors"
@@ -381,32 +338,6 @@ const ExorcismGame = () => {
             
             {/* Modal Content */}
             <RitualTable />
-            {/* <div className="flex-1 overflow-auto p-4">
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-700 text-sm">
-                  <thead>
-                    <tr>
-                      {tableColumns.map((col, index) => (
-                        <th key={index} className="border border-gray-700 px-2 py-1 bg-gray-800 text-red-400 font-medium">
-                          {col}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tableRows.map((row, rowIndex) => (
-                      <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-gray-950' : 'bg-gray-900'}>
-                        {tableColumns.map((col, colIndex) => (
-                          <td key={colIndex} className="border border-gray-700 px-2 py-1 text-gray-300">
-                            {row[col]}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div> */}
           </div>
         </div>
       )}
@@ -452,12 +383,7 @@ const ExorcismGame = () => {
               <span className="text-red-600 font-bold">{blockedQuestions}</span>
             </div>
           )}
-          {/* <button
-            onClick={logoutTeam}
-            className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-sm font-medium transition-colors"
-          >
-            Logout / Switch Team
-          </button> */}
+          {/* LOG OUT BUTTON HERE */}
         </div>
       </div>
 
@@ -489,8 +415,6 @@ const ExorcismGame = () => {
               </div>
             </div>
 
-            
-
             {/* Game Status Messages */}
             {totalQuestions > 0 && isGameCompleted && !isGameFinished && (
               <div className="bg-green-900/30 border border-green-700 px-4 py-3 rounded mb-4">
@@ -515,30 +439,9 @@ const ExorcismGame = () => {
                 {/* Information Paragraphs */}
             <div className="mb-4 space-y-3">
               <div className="bg-red-900/20 border border-red-800 rounded-lg p-3">
-                <p className="text-red-200 text-sm leading-relaxed">
-                  🔥🕯️ You have stepped inside the cursed ritual chamber of Tatya Vinchu...<br></br>
-                  The air is thick with incense and dread.<br></br><br></br>
-
-                  At the center lies an ancient ritual circle, bound by six sacred item types:<br></br>
-                  🍎 Fruits, 🍃 Leaves, 🛢️ Oils, 🛠️ Tools, 🐂 Animal Products, and 🔱 Religious Items.<br></br><br></br>
-
-                  ⚔️ Tatya has cast a Query Jaal - a trap woven with SQL logic.<br></br>
-                  ✨ Each correct query lights a virtual candle...<br></br>
-                  💥 Each mistake triggers a burst of spiritual backlash.<br></br><br></br>
-
-                  😈 One of you is already corrupted, carrying a list of 20 ritual items - only a few of them are pure.<br></br>
-                  The other two must solve 5 SQL riddles based on the cursed item table.<br></br><br></br>
-
-                  ⚖️ If at least 3 of your answers match the corrupted list…<br></br>
-                  👉 The ritual will allow you to pass.<br></br>
-                  ❌ If not… you stay trapped in the Query Jaal forever. 🕸️
+                <p className="text-red-200 text-sm leading-relaxed">{info}
                 </p>
               </div>
-              {/* <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-3">
-                <p className="text-blue-200 text-sm leading-relaxed">
-                  Use your investigative skills wisely - you have limited attempts for each case. Analyze the evidence carefully, construct your queries thoughtfully, and remember that attention to detail is key to solving these mysteries. Good luck, detective!
-                </p>
-              </div> */}
             </div>
                 <div className='pb-2'>
                   <p className="text-2xl font-bold text-red-400">🗂️ List of Possible Cases</p>
@@ -619,13 +522,7 @@ const ExorcismGame = () => {
                       <div className="text-xs text-gray-400">Success Rate</div>
                     </div>
                   </div>
-                  
-                  {/* <button
-                    onClick={resetGame}
-                    className="w-full px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded font-medium transition-colors"
-                  >
-                    🔄 New Investigation
-                  </button> */}
+                  {/* NEW GAME BUTTON */}
                 </div>
                 
                 {/* Detailed Results */}
@@ -746,10 +643,6 @@ const ExorcismGame = () => {
                         <span className="text-white font-medium">{stats.incorrectAttempts}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Avg Attempts/Case:</span>
-                        <span className="text-white font-medium">{stats.averageAttemptsPerQuestion}</span>
-                      </div>
-                      <div className="flex justify-between">
                         <span className="text-gray-400">Efficiency Rate:</span>
                         <span className="text-white font-medium">{stats.efficiency}%</span>
                       </div>
@@ -846,12 +739,6 @@ const ExorcismGame = () => {
                 className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors font-medium"
               >
                 📋 View Full Report
-              </button>
-              <button
-                onClick={resetGame}
-                className="px-6 py-3 bg-red-800 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
-              >
-                🔄 New Investigation
               </button>
             </div>
           </div>

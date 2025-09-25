@@ -22,6 +22,8 @@ const QuestionCard = ({
   const isBlocked = attempts >= question.maxAttempts;
   const isCorrect = validationStatus === 'correct';
 
+  const res = '[{"col_name":"Answer"}]';
+
   // Render hearts for attempts
   const renderHearts = (attempts, maxAttempts = 5) => {
     const usedAttempts = attempts || 0;
@@ -102,12 +104,12 @@ const QuestionCard = ({
         </div>
         <div className="flex items-center gap-2 ml-4">
           {getStatusIcon()}
-          <button
+          {/* <button
             onClick={onToggleHint}
             className="text-yellow-400 hover:text-yellow-300 transition-colors"
           >
             <AlertCircle className="w-5 h-5" />
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -179,11 +181,11 @@ const QuestionCard = ({
                 ))}
               </tbody>
             </table>
-            {result.length > 5 && (
+            {/* {result.length > 5 && (
               <p className="text-gray-400 text-xs mt-2">
                 ... and {result.length - 5} more rows
               </p>
-            )}
+            )} */}
           </div>
         </div>
       )}
@@ -238,7 +240,8 @@ const QuestionCard = ({
             ❌ The query result doesn&apos;t match the expected answer exactly.
           </p>
           <p className="text-red-200 text-xs mt-1">
-            Expected: <strong>{JSON.stringify(question.expectedOutput)}</strong>
+            {/* Expected: <strong>{JSON.stringify(question.expectedOutput)}</strong> */}
+            Expected: <strong>{res}</strong>
           </p>
           <p className="text-red-200 text-xs">
             Your result must match exactly in structure, column names, values, and row count.
