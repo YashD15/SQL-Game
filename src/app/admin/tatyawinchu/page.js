@@ -13,69 +13,89 @@ async function getResults() {
 export default async function ResultsPage() {
   const data = await getResults();
 
+  if (!data.results || data.results.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <p className="text-xl font-bold text-red-500 animate-pulse">No souls found...</p>
+      </div>
+    );
+  }
+
   const sortedResults = [...data.results].sort(
     (a, b) => parseFloat(b.successRate) - parseFloat(a.successRate)
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Team Results</h1>
-      <div className="grid gap-6">
-        {sortedResults.map((team, idx) => (
-          <div
-            key={idx}
-            className="bg-white rounded-2xl shadow-md p-6 border border-gray-200"
-          >
-            <h2 className="text-2xl font-semibold text-blue-700">
-              {team.teamName}
-            </h2>
-            <p className="mt-2 text-gray-700">
-              Success Rate:{" "}
-              <span className="font-bold">{team.successRate}%</span>
-            </p>
-            <p className="text-gray-700">
-              Score: <span className="font-bold">{team.score}</span> /{" "}
-              {team.totalQuestions}
-            </p>
-            <p className="text-gray-700">
-              Attempts: <span className="font-bold">{team.totalAttempts}</span>
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-blue-900 p-4">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-5xl font-bold text-center mb-8 text-transparent bg-gradient-to-r from-red-500 via-blue-400 to-red-600 bg-clip-text">
+          ⚡ RESULTS LEADERBOARD ⚡
+        </h1>
+        
+        <div className="space-y-4">
+          {sortedResults.map((team, idx) => (
+            <div
+              key={idx}
+              className="bg-gradient-to-r from-gray-900 via-black to-gray-900 border border-red-800/30 rounded-lg p-4 hover:border-red-500/50 transition-all duration-300 shadow-lg hover:shadow-red-500/20"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-xl font-bold text-blue-300 flex items-center gap-2">
+                  {idx === 0 && "👑"} {team.teamName}
+                </h2>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-red-400">{team.successRate}%</div>
+                  <div className="text-xs text-gray-400">success rate</div>
+                </div>
+              </div>
 
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold mb-2">Questions</h3>
-              <ul className="space-y-3">
+              {/* Stats */}
+              <div className="flex gap-6 mb-4 text-sm">
+                <div className="text-gray-300">
+                  <span className="text-blue-400 font-semibold">{team.score}</span>
+                  <span className="text-gray-500">/{team.totalQuestions}</span>
+                  <span className="ml-1 text-xs text-gray-400">solved</span>
+                </div>
+                <div className="text-gray-300">
+                  <span className="text-red-400 font-semibold">{team.totalAttempts}</span>
+                  <span className="ml-1 text-xs text-gray-400">attempts</span>
+                </div>
+              </div>
+
+              {/* Questions Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {team.questions.map((q) => (
-                  <li
+                  <div
                     key={q.id}
-                    className={`p-4 rounded-lg border ${
+                    className={`p-3 rounded border-l-4 text-xs transition-all hover:scale-105 ${
                       q.status === "correct"
-                        ? "bg-green-100 border-green-400"
-                        : "bg-red-100 border-red-400"
+                        ? "bg-green-900/20 border-l-green-400 hover:bg-green-900/30"
+                        : "bg-red-900/20 border-l-red-400 hover:bg-red-900/30"
                     }`}
                   >
-                    <p className="font-medium">{q.questionText}</p>
-                    <p className="text-sm text-gray-600">
-                      Attempts: {q.attempts}
-                    </p>
-                    <p className="text-sm">
-                      Expected:{" "}
-                      {q.expectedOutput.map((o) => o.item_name).join(", ")}
-                    </p>
-                    <p
-                      className={`text-sm font-bold ${
-                        q.status === "correct"
-                          ? "text-green-700"
-                          : "text-red-700"
-                      }`}
-                    >
-                      Status: {q.status}
-                    </p>
-                  </li>
+                    <div className="font-medium text-gray-200 mb-1 truncate" title={q.questionText}>
+                      {q.questionText}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">
+                        {q.attempts} tries
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-bold ${
+                          q.status === "correct"
+                            ? "bg-green-600/20 text-green-300"
+                            : "bg-red-600/20 text-red-300"
+                        }`}
+                      >
+                        {q.status === "correct" ? "✓" : "✗"}
+                      </span>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
