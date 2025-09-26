@@ -6,10 +6,10 @@ let db = null;
 export function getDatabase() {
   if (!db) {
     const dbPath = path.join(process.cwd(), 'game.db');
-    db = new Database(dbPath);
+    db = new Database(dbPath,{ readonly: true });
     
     // Create tables and insert sample data
-    initializeGameDatabase();
+    // initializeGameDatabase();
   }
   return db;
 }
