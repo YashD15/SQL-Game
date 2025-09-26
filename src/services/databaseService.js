@@ -28,18 +28,3 @@ export const executeSQLQuery = async (query) => {
     };
   }
 };
-
-// Alternative direct import version (if not using API routes)
-// import { executeQuery } from '../lib/database';
-// 
-// export const executeSQLQuery = async (query) => {
-//   try {
-//     return executeQuery(query);
-//   } catch (error) {
-//     return {
-//       success: false,
-//       error: error.message,
-//       data: []
-//     };
-//   }
-// };

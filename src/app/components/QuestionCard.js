@@ -123,9 +123,6 @@ const QuestionCard = ({
           <p className="text-red-200 text-sm mt-1">
             You&apos;ve exceeded the maximum number of attempts ({question.maxAttempts || 5}) for this question.
           </p>
-          <p className="text-red-200 text-xs mt-2">
-            Expected Answer: <strong>{question.expectedOutput[0].item_name}</strong>
-          </p>
         </div>
       )}
 
@@ -181,11 +178,6 @@ const QuestionCard = ({
                 ))}
               </tbody>
             </table>
-            {/* {result.length > 5 && (
-              <p className="text-gray-400 text-xs mt-2">
-                ... and {result.length - 5} more rows
-              </p>
-            )} */}
           </div>
         </div>
       )}

@@ -6,7 +6,6 @@ import { validateQueryResult, getValidationMessage, hasExceededMaxAttempts } fro
 import { executeSQLQuery } from '../../services/databaseService';
 import QuestionCard from './QuestionCard';
 import RitualTable from './DummyTable';
-import { info } from "./info";
 import { generateFinalResult } from './finalResultGenerator';
 
 const ExorcismGame = () => {
@@ -220,38 +219,6 @@ const ExorcismGame = () => {
   const toggleHint = (questionId) => {
     setShowHints(prev => ({ ...prev, [questionId]: !prev[questionId] }));
   };
-
-  // Function to generate final game result
-// const generateFinalResult = () => {
-//   if (!currentQuestions.length) return;
-
-//   const finalResult = currentQuestions.map((question) => ({
-//     id: question.id,
-//     questionText: question.questionText || question.prompt || '', // keep your field consistent
-//     expectedOutput: question.expectedOutput || null,
-//     userQuery: queries[question.id] || '',
-//     userResult: results[question.id] || null,
-//     status: validationStatus[question.id] || 'not_attempted',
-//     attempts: attempts[question.id] || 0,
-//     isBlocked: hasExceededMaxAttempts(attempts[question.id] || 0, question.maxAttempts || 5) && validationStatus[question.id] !== 'correct',
-//     showHint: showHints[question.id] || false
-//   }));
-
-//   const gameSummary = {
-//     teamName,
-//     totalQuestions: currentQuestions.length,
-//     score,
-//     blockedQuestions,
-//     totalAttempts: stats.totalAttempts,
-//     successRate: stats.successRate,
-//     efficiency: stats.efficiency,
-//     questions: finalResult
-//   };
-
-//   console.log("Final Game Result JSON:", JSON.stringify(gameSummary, null, 2));
-//   return gameSummary;
-// };
-
 
   // Render hearts for attempts
   const renderHearts = (questionId, maxAttempts = 5) => {
@@ -480,7 +447,23 @@ const ExorcismGame = () => {
                 {/* Information Paragraphs */}
             <div className="mb-4 space-y-3">
               <div className="bg-red-900/20 border border-red-800 rounded-lg p-3">
-                <p className="text-red-200 text-sm leading-relaxed">{info}
+                <p className="text-red-200 text-sm leading-relaxed">
+                  🔥🕯️ You have stepped inside the cursed ritual chamber of Tatya Vinchu...<br></br>
+                  The air is thick with incense and dread.<br></br><br></br>
+
+                  At the center lies an ancient ritual circle, bound by six sacred item types:<br></br>
+                  🍎 Fruits, 🍃 Leaves, 🛢️ Oils, 🛠️ Tools, 🐂 Animal Products, and 🔱 Religious Items.<br></br><br></br>
+
+                  ⚔️ Tatya has cast a Query Jaal - a trap woven with SQL logic.<br></br>
+                  ✨ Each correct query lights a virtual candle...<br></br>
+                  💥 Each mistake triggers a burst of spiritual backlash.<br></br><br></br>
+
+                  😈 One of you is already corrupted, carrying a list of 20 ritual items - only a few of them are pure.<br></br>
+                  The other two must solve 5 SQL riddles based on the cursed item table.<br></br><br></br>
+
+                  ⚖️ If at least 3 of your answers match the corrupted list…<br></br>
+                  👉 The ritual will allow you to pass.<br></br>
+                  ❌ If not… you stay trapped in the Query Jaal forever. 🕸️
                 </p>
               </div>
             </div>
