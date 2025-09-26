@@ -1,97 +1,125 @@
-import React from "react";
+"use client"
+import React, { useState, useEffect } from 'react';
+import { CheckCircle, XCircle } from 'lucide-react';
 
-async function getResults() {
-  const res = await fetch("https://nse-stock-api.onrender.com/getresults", {
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    throw new Error("Failed to fetch results");
-  }
-  return res.json();
-}
+const QuizResultsDashboard = () => {
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export default async function ResultsPage() {
-  const data = await getResults();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('https://nse-stock-api.onrender.com/getresults'); // Replace with your actual API endpoint
+        const data = await response.json();
+        
+        // Sort results by success rate in ascending order
+        const sortedResults = data.results.sort((a, b) => {
+          return parseFloat(b.successRate) - parseFloat(a.successRate);
+        });
+        
+        setResults(sortedResults);
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch quiz results');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  if (!data.results || data.results.length === 0) {
+  const getSuccessRateColor = (rate) => {
+    const numRate = parseFloat(rate);
+    if (numRate >= 70) return 'text-green-600';
+    if (numRate >= 40) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <p className="text-xl font-bold text-red-500 animate-pulse">No souls found...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  const sortedResults = [...data.results].sort(
-    (a, b) => parseFloat(b.successRate) - parseFloat(a.successRate)
-  );
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-blue-900 p-4">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-5xl font-bold text-center mb-8 text-transparent bg-gradient-to-r from-red-500 via-blue-400 to-red-600 bg-clip-text">
-          ⚡ RESULTS LEADERBOARD ⚡
-        </h1>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Quiz Results</h1>
         
-        <div className="space-y-4">
-          {sortedResults.map((team, idx) => (
-            <div
-              key={idx}
-              className="bg-gradient-to-r from-gray-900 via-black to-gray-900 border border-red-800/30 rounded-lg p-4 hover:border-red-500/50 transition-all duration-300 shadow-lg hover:shadow-red-500/20"
-            >
-              {/* Header */}
-              <div className="flex justify-between items-center mb-3">
-                <h2 className="text-xl font-bold text-blue-300 flex items-center gap-2">
-                  {idx === 0 && "👑"} {team.teamName}
-                </h2>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-red-400">{team.successRate}%</div>
-                  <div className="text-xs text-gray-400">success rate</div>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="flex gap-6 mb-4 text-sm">
-                <div className="text-gray-300">
-                  <span className="text-blue-400 font-semibold">{team.score}</span>
-                  <span className="text-gray-500">/{team.totalQuestions}</span>
-                  <span className="ml-1 text-xs text-gray-400">solved</span>
-                </div>
-                <div className="text-gray-300">
-                  <span className="text-red-400 font-semibold">{team.totalAttempts}</span>
-                  <span className="ml-1 text-xs text-gray-400">attempts</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {results.map((result, teamIndex) => (
+            <div key={teamIndex} className="bg-white rounded-lg shadow-sm border">
+              {/* Team Header */}
+              <div className="bg-gray-800 text-white p-3 rounded-t-lg">
+                <div className="flex justify-between items-center">
+                  <h2 className="font-semibold text-lg">{result.teamName}</h2>
+                  <div className="flex gap-4 text-sm">
+                    <span>Score: {result.score}/{result.totalQuestions}</span>
+                    <span className={getSuccessRateColor(result.successRate)}>
+                      {result.successRate}%
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Questions Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                {team.questions.map((q) => (
-                  <div
-                    key={q.id}
-                    className={`p-3 rounded border-l-4 text-xs transition-all hover:scale-105 ${
-                      q.status === "correct"
-                        ? "bg-green-900/20 border-l-green-400 hover:bg-green-900/30"
-                        : "bg-red-900/20 border-l-red-400 hover:bg-red-900/30"
-                    }`}
-                  >
-                    <div className="font-medium text-gray-200 mb-1 truncate" title={q.questionText}>
-                      {q.questionText}
+              <div className="p-4 max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-3 gap-2">
+                  {result.questions.map((question) => (
+                    <div key={question.id} className="border rounded-lg p-2 hover:bg-gray-50">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1">
+                          <span className="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded font-medium">
+                            Q{question.id}
+                          </span>
+                          {question.status === 'correct' ? (
+                            <CheckCircle className="w-3 h-3 text-green-600" />
+                          ) : (
+                            <XCircle className="w-3 h-3 text-red-600" />
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {question.attempts}
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-gray-700 mb-2 line-clamp-2 leading-tight">
+                        {question.questionText}
+                      </p>
+
+                      <div className="mb-2">
+                        <span className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded block truncate">
+                          {question.expectedOutput[0]?.item_name}
+                        </span>
+                      </div>
+
+                      {/* Hint - Always visible */}
+                      <div className="bg-blue-50 border border-blue-200 rounded p-2">
+                        <p className="text-xs text-blue-800 leading-tight">{question.questionHint}</p>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">
-                        {q.attempts} tries
-                      </span>
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-bold ${
-                          q.status === "correct"
-                            ? "bg-green-600/20 text-green-300"
-                            : "bg-red-600/20 text-red-300"
-                        }`}
-                      >
-                        {q.status === "correct" ? "✓" : "✗"}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+
+              {/* Team Stats Footer */}
+              <div className="bg-gray-50 p-3 rounded-b-lg border-t">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Total Attempts: {result.totalAttempts}</span>
+                  <span>Efficiency: {result.efficiency}%</span>
+                </div>
               </div>
             </div>
           ))}
@@ -99,4 +127,6 @@ export default async function ResultsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default QuizResultsDashboard;
