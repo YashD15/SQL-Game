@@ -103,7 +103,7 @@ const ExorcismGame = () => {
       validationStatus,
       validationMessages,
       errors: {},
-      // attempts,
+      attempts,
       showHints,
       isGameFinished,
     };
