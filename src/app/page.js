@@ -1,7 +1,6 @@
 // src/app/page.js
 
 import ExorcismGame from '../app/components/ExorcismGame';
-// import './globals.css'
 
 export default function HomePage() {
   return (

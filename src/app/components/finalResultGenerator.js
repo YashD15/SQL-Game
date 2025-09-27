@@ -44,20 +44,21 @@ export const generateFinalResult = ({
   };
 
   // console.log("Final Game Result JSON:", JSON.stringify(gameSummary, null, 2));
+
   // Send JSON to Flask API
-fetch("https://nse-stock-api.onrender.com/sqlresult", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(gameSummary)
-})
-  .then(response => response.json())
-  .then(data => {
-    console.log("Server response:", data);
-  })
-  .catch(error => {
-    console.error("Error:", error);
-  });
+  // fetch("https://nse-stock-api.onrender.com/sqlresult", {
+  //   method: "POST",
+  //   headers: {
+  //     "Content-Type": "application/json"
+  //   },
+  //   body: JSON.stringify(gameSummary)
+  // })
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     console.log("Server response:", data);
+  //   })
+  //   .catch(error => {
+  //     console.error("Error:", error);
+  //   });
   return gameSummary;
 };

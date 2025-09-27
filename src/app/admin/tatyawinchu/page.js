@@ -11,7 +11,8 @@ const QuizResultsDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://nse-stock-api.onrender.com/getresults'); // Replace with your actual API endpoint
+        // const response = await fetch('https://nse-stock-api.onrender.com/getresults'); // Replace with your actual API endpoint
+        const response = await fetch('/results.json');
         const data = await response.json();
         
         // Sort results by success rate in ascending order

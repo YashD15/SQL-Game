@@ -242,6 +242,26 @@ const ExorcismGame = () => {
   };
 
   // Reset game HERE
+  const resetGame = () => {
+    // Load a new random set
+    initializeRandomSet();
+    
+    // Reset all game state
+    setQueries({});
+    setResults({});
+    setValidationStatus({});
+    setValidationMessages({});
+    setErrors({});
+    setLoading({});
+    setAttempts({});
+    setShowHints({});
+    setIsGameFinished(false);
+
+    // Clear persisted state for this team (but keep team name)
+    try {
+      if (teamName) localStorage.removeItem(getTeamStorageKey(teamName));
+    } catch {}
+  };
   
   // Get game statistics
   const getGameStats = () => {
@@ -276,21 +296,31 @@ const ExorcismGame = () => {
   };
 
   // Logout / Switch Team HERE
-  
-  // Generate sample table data
-  const generateTableData = () => {
-    const columns = Array.from({length: 16}, (_, i) => `Column_${i + 1}`);
-    const rows = Array.from({length: 43}, (_, rowIndex) => 
-      columns.reduce((row, col, colIndex) => {
-        row[col] = `Row${rowIndex + 1}_Col${colIndex + 1}`;
-        return row;
-      }, {})
-    );
-    return { columns, rows };
+  const logoutTeam = () => {
+    try {
+      if (teamName) localStorage.removeItem(getTeamStorageKey(teamName));
+      localStorage.removeItem(TEAM_NAME_KEY);
+    } catch {}
+
+    // Clear in-memory state
+    setTeamName('');
+    setTeamInput('');
+    setIsTeamModalOpen(true);
+
+    setCurrentQuestions([]);
+    setCurrentSetInfo(null);
+    setSelectedQuestionId(null);
+    setQueries({});
+    setResults({});
+    setValidationStatus({});
+    setValidationMessages({});
+    setErrors({});
+    setLoading({});
+    setAttempts({});
+    setShowHints({});
+    setIsGameFinished(false);
   };
-
-  const { columns: tableColumns, rows: tableRows } = generateTableData();
-
+  
   return (
     <div className="h-screen bg-black text-white overflow-hidden flex flex-col">
       {/* Team Name Modal */}
@@ -353,7 +383,6 @@ const ExorcismGame = () => {
       {/* Header */}
       <div className="bg-gray-900 border-b border-red-900 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Skull className="w-8 h-8 text-red-500" />
           <h1 className="text-2xl font-bold text-red-400">
             🔍 Murder Mystery SQL Investigation
           </h1>
@@ -392,6 +421,12 @@ const ExorcismGame = () => {
             </div>
           )}
           {/* LOG OUT BUTTON HERE */}
+          <button
+            onClick={logoutTeam}
+            className="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white rounded text-sm font-medium transition-colors"
+           >
+             Logout / Switch Team
+          </button>
         </div>
       </div>
 
@@ -547,6 +582,12 @@ const ExorcismGame = () => {
                     </div>
                   </div>
                   {/* NEW GAME BUTTON */}
+                  <button
+                   onClick={resetGame}
+                    className="w-full px-4 py-2 bg-red-800 hover:bg-red-700 text-white rounded font-medium transition-colors"
+                   >
+                     🔄 New Investigation
+                  </button>
                 </div>
                 
                 {/* Detailed Results */}

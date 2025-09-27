@@ -1,5 +1,3 @@
-// data/gameQuestions.js
-
 // Define all 7 question sets
 export const questionSets = {
   set1: {

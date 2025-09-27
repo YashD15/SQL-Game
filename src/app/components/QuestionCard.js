@@ -104,12 +104,12 @@ const QuestionCard = ({
         </div>
         <div className="flex items-center gap-2 ml-4">
           {getStatusIcon()}
-          {/* <button
+          <button
             onClick={onToggleHint}
             className="text-yellow-400 hover:text-yellow-300 transition-colors"
           >
             <AlertCircle className="w-5 h-5" />
-          </button> */}
+          </button>
         </div>
       </div>
 
