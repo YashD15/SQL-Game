@@ -37,11 +37,10 @@
 
 ## 👥 Collaborators
 - [Yash Dhavde](https://github.com/YashD15)
-- [Varad Khandare](https://github.com/Varad11220)
 
 ---
 
-## 🚀 Deployment
+## 🚀 Deployment (Dropped)
 [Visit SQL Game](https://sql-tatyawinchu.vercel.app/)
 
 ---
